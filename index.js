@@ -3,23 +3,21 @@ const config = require("./config");
 const fs = require("fs");
 const fetch = require("node-fetch");
 
-// const NASA_API_key = "api_key=BRmm3b7gc0dz5OZYdBxIobwdrJNgYoURqgX1iywS";
-const NASA_API =
-  "https://api.nasa.gov/planetary/apod?api_key=BRmm3b7gc0dz5OZYdBxIobwdrJNgYoURqgX1iywS";
+const NASA_API_key = process.env.API_KEY;
+const NASA_API = `https://api.nasa.gov/planetary/apod?api_key=${NASA_API_key}`;
 
 var T = new Twit(config);
 
 async function getImage() {
   const response = await fetch(NASA_API);
   const image = await response.json();
-  return image.url;
 }
 
-const imageURL = getImage();
+const imageURL = getImage().catch(err => {
+  console.log(err);
+});
 
-const useImage = fs.readFile({ file: imageURL }, { encoding: "base64" });
-
-console.log(imageURL);
+//
 
 function tweetIt(url) {
   T.post("media/upload", { media_data: url }, function(err, data, response) {
@@ -50,4 +48,4 @@ function tweetIt(url) {
   // );
 }
 
-tweetIt(useImage);
+tweetIt();
