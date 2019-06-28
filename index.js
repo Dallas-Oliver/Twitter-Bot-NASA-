@@ -1,13 +1,13 @@
 const Twit = require("twit");
+const config = require("./config");
 var T = new Twit(config);
 
-const config = require("./config");
+const path = require("path");
+const request = require("request");
+const concat = require("concat-stream");
 const fs = require("fs");
 const fetch = require("node-fetch");
 require("dotenv").config();
-
-const canvas = document.querySelector("canvas");
-const ctx = canvas.getContext("2d");
 
 const express = require("express");
 const app = express();
@@ -22,7 +22,17 @@ fetch(NASA_API)
     return response.json();
   })
   .then(data => {
-    console.log(data.url);
+    const image = request(data.url);
+
+    image.pipe(
+      concat({ encoding: "buffer" }, buf => {
+        const ext = path.extname(data.url).slice(1);
+
+        if (ext === "svg") ext = "svg+xml";
+        const src = "data:image/" + ext + ";base64," + buf.toString("base64");
+        tweetIt(src);
+      })
+    );
   })
   .catch(err => {
     if (err) {
@@ -30,25 +40,23 @@ fetch(NASA_API)
     }
   });
 
-// function tweetIt(url) {
-//   T.post("media/upload", { media_data: cat }, function(err, data, response) {
-//     var mediaIdStr = data.media_id_string;
-//     var altText = "NASA_APOD.";
-//     var meta_params = { media_id: mediaIdStr, alt_text: { text: altText } };
+function tweetIt(source) {
+  T.post("media/upload", { media_data: source }, function(err, data, response) {
+    var mediaIdStr = data.media_id_string;
+    var altText = "NASA_APOD.";
+    var meta_params = { media_id: mediaIdStr, alt_text: { text: altText } };
 
-//     T.post("media/metadata/create", meta_params, function(err, data, response) {
-//       if (!err) {
-//         var params = {
-//           status: "NASA's Astronomy Picture of the Day!",
-//           media_ids: [mediaIdStr]
-//         };
+    T.post("media/metadata/create", meta_params, function(err, data, response) {
+      if (!err) {
+        var params = {
+          status: "NASA's Astronomy Picture of the Day!",
+          media_ids: [mediaIdStr]
+        };
 
-//         T.post("statuses/update", params, function(err, data, response) {
-//           console.log(data);
-//         });
-//       }
-//     });
-//   });
-// }
-
-// tweetIt();
+        T.post("statuses/update", params, function(err, data, response) {
+          console.log(data);
+        });
+      }
+    });
+  });
+}
