@@ -30,7 +30,7 @@ fetch(NASA_API)
 
         if (ext === "svg") ext = "svg+xml";
         const src = "data:image/" + ext + ";base64," + buf.toString("base64");
-        tweetIt(src);
+        console.log(src);
       })
     );
   })
