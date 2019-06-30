@@ -1,7 +1,8 @@
 const Twit = require("twit");
-const config = require("./config");
+const config = require("./config.js");
 var T = new Twit(config);
 
+const FileReader = require("FileReader");
 const path = require("path");
 const request = require("request");
 const concat = require("concat-stream");
@@ -22,26 +23,21 @@ fetch(NASA_API)
     return response.json();
   })
   .then(data => {
-    const image = request(data.url);
+    console.log(data.hdurl);
 
-    image.pipe(
-      concat({ encoding: "buffer" }, buf => {
-        const ext = path.extname(data.url).slice(1);
+    request.get(data.hdurl, (err, response, body) => {
+      const b = new Buffer(body);
+      const s = b.toString("base64");
 
-        if (ext === "svg") ext = "svg+xml";
-        const src = "data:image/" + ext + ";base64," + buf.toString("base64");
-        console.log(src);
-      })
-    );
-  })
-  .catch(err => {
-    if (err) {
-      console.log("error2", err);
-    }
+      tweetIt(s);
+    });
   });
 
 function tweetIt(source) {
   T.post("media/upload", { media_data: source }, function(err, data, response) {
+    if (err) {
+      console.log(err);
+    }
     var mediaIdStr = data.media_id_string;
     var altText = "NASA_APOD.";
     var meta_params = { media_id: mediaIdStr, alt_text: { text: altText } };
