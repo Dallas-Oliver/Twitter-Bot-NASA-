@@ -2,11 +2,8 @@ const Twit = require("twit");
 const config = require("./config.js");
 var T = new Twit(config);
 
-const FileReader = require("FileReader");
-const path = require("path");
-const request = require("request");
-const concat = require("concat-stream");
-const fs = require("fs");
+const base64url = require("base64url");
+
 const fetch = require("node-fetch");
 require("dotenv").config();
 
@@ -15,26 +12,60 @@ const app = express();
 
 app.listen(3000, () => console.log("listening at port 3000"));
 
-const NASA_API_key = process.env.API_KEY;
+const NASA_API_key = process.env.NASA_API_KEY;
 const NASA_API = `https://api.nasa.gov/planetary/apod?api_key=${NASA_API_key}`;
 
-fetch(NASA_API)
-  .then(response => {
-    return response.json();
-  })
-  .then(data => {
-    console.log(data.hdurl);
+const run = async () => {
+  const apod = await fetch(NASA_API);
+  const data = await apod.json();
 
-    request.get(data.hdurl, (err, response, body) => {
-      const b = new Buffer(body);
-      const s = b.toString("base64");
+  console.log("image: " + data.hdurl);
+  console.log("video: " + data.url);
 
-      tweetIt(s);
-    });
+  if (is_image(data)) {
+
+    await upload_image(data);
+
+  } else if (is_video(data)) {
+
+    upload_video(data);
+
+  }
+};
+
+function is_video(data) {
+  return data.url;
+}
+
+function is_image(data) {
+  return data.hdurl;
+}
+
+function upload_video(data) {
+  const regex = /https:\/\/www\.youtube\.com\/embed\/(.+)/;
+  const match = regex.exec(data.url);
+  const videoId = match[1];
+  const url = `https://youtube.com/watch?v=${videoId}`;
+
+  tweet_status(url);
+}
+
+async function upload_image(data) {
+  const img_req = await fetch(data.hdurl);
+  const img = await img_req.text();
+  const base64 = base64url(img);
+
+  tweet_media(base64);
+}
+
+function tweet_status(video_url) {
+  T.post("statuses/update", { status: video_url }, function(err, data, response) {
+    console.log(data)
   });
+}
 
-function tweetIt(source) {
-  T.post("media/upload", { media_data: source }, function(err, data, response) {
+function tweet_media(image_data) {
+  T.post("media/upload", { media_data: image_data }, function(err, data, response) {
     if (err) {
       console.log(err);
     }
@@ -56,3 +87,5 @@ function tweetIt(source) {
     });
   });
 }
+
+run();
