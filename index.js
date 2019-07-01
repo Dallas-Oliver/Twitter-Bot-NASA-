@@ -6,6 +6,8 @@ const base64url = require("base64url");
 
 const fetch = require("node-fetch");
 require("dotenv").config();
+const base64url = require("base64url");
+const pngToJpg = require("png-to-jpeg");
 
 const express = require("express");
 const app = express();
