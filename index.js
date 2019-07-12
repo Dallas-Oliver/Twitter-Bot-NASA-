@@ -5,6 +5,7 @@ var T = new Twit(config);
 const fetch = require("node-fetch");
 require("dotenv").config();
 const base64url = require("base64url");
+const fs = require("fs");
 
 const express = require("express");
 const app = express();
@@ -35,7 +36,6 @@ const run = async () => {
   } else if (is_video(data)) {
     upload_video(data);
   }
-  console.log(data);
 };
 
 function is_video(data) {
@@ -63,6 +63,38 @@ async function upload_image(data) {
   tweet_media(img.toString("base64"));
 }
 
+function recordTime() {
+  const time = new Date().toLocaleTimeString();
+  const date = new Date().toLocaleDateString();
+
+  const time_data = {
+    timestamp: time,
+    date: date
+  };
+
+  const data_string = JSON.stringify(time_data);
+
+  fs.writeFile("timestamps.json", data_string, err => {
+    if (err) {
+      console.log(err);
+    }
+    console.log("time recorded");
+  });
+}
+
+function readTime() {
+  fs.readFile("timestamps.json", (err, data) => {
+    if (err) {
+      console.log(err);
+    }
+
+    const timeAndDate = data.toString();
+    const json = JSON.parse(timeAndDate);
+  });
+}
+
+readTime();
+
 function tweet_status(video_url) {
   T.post(
     "statuses/update",
@@ -71,6 +103,7 @@ function tweet_status(video_url) {
     },
     function(err, data, response) {
       console.log(data);
+      recordTime();
     }
   );
 }
@@ -84,18 +117,25 @@ function tweet_media(image_data) {
     if (err) {
       console.log("err1", err);
     }
-    console.log(data);
+
     var mediaIdStr = data.media_id_string;
 
     var params = {
-      status: "NASA's Astronomy Picture of the Day!",
+      status:
+        "#100DaysofCode NASA's Astronomy Picture of the Day posted using a Twitter Bot!",
       media_ids: [mediaIdStr]
     };
 
     T.post("statuses/update", params, function(err, data, response) {
-      console.log(data);
+      recordTime();
     });
   });
 }
 
-run();
+function checkTime() {
+  if (true === false) {
+    run();
+  }
+}
+
+checkTime();
