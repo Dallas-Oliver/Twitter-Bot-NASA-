@@ -14,6 +14,15 @@ app.listen(3000, () => console.log("listening at port 3000"));
 const NASA_API_key = process.env.NASA_API_KEY;
 const NASA_API = `https://api.nasa.gov/planetary/apod?api_key=${NASA_API_key}`;
 
+//record current time everytime you upload,
+//write timestamp as json object to local file
+//check json data every minute, if it has been 24 hours since last timestamp, upload again
+
+// const now = new Date().toLocaleTimeString();
+// const time_data = {
+//   timestamp: now
+// };
+
 const run = async () => {
   const apod = await fetch(NASA_API);
   const data = await apod.json();
