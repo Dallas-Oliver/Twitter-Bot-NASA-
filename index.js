@@ -66,7 +66,7 @@ async function upload_image(data) {
 function recordTime() {
   const time = new Date().toLocaleTimeString();
   const date = new Date().toLocaleDateString();
-
+  console.log(time);
   const time_data = {
     timestamp: time,
     date: date
@@ -90,7 +90,24 @@ function readTime() {
 
     const timeAndDate = data.toString();
     const json = JSON.parse(timeAndDate);
+
+    const previousTime = toSeconds(json.timestamp);
+    const currentTime = toSeconds(new Date().toLocaleTimeString());
+
+    const oneDayInSeconds = 86400;
+
+    if (currentTime - previousTime < oneDayInSeconds) {
+      console.log("not enough time has elapsed");
+    } else if (currentTime - previousTime >= oneDayInSeconds) {
+      console.log("it has been at least 24 hours. It is ok to post again");
+    }
   });
+  recordTime();
+}
+
+function toSeconds(t) {
+  const bits = t.split(":");
+  return bits[0] * 3600 + bits[1] * 60 + bits[2] * 1;
 }
 
 readTime();
