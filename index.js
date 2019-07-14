@@ -66,7 +66,7 @@ async function upload_image(data) {
 function recordTime() {
   const time = new Date().toLocaleTimeString();
   const date = new Date().toLocaleDateString();
-  console.log(time);
+
   const time_data = {
     timestamp: time,
     date: date
@@ -150,7 +150,7 @@ function tweet_media(image_data) {
 }
 
 function checkTime() {
-  if (true === false) {
+  if (true) {
     run();
   }
 }
