@@ -1,3 +1,5 @@
+//packages and requires ===================================================
+
 const Twit = require("twit");
 const config = require("./config.js");
 var T = new Twit(config);
@@ -5,6 +7,8 @@ var T = new Twit(config);
 const fetch = require("node-fetch");
 require("dotenv").config();
 const fs = require("fs");
+
+//api key and endpoint ====================================================
 
 const NASA_API_key = process.env.NASA_API_KEY;
 const NASA_API = `https://api.nasa.gov/planetary/apod?api_key=${NASA_API_key}`;
@@ -20,14 +24,6 @@ const run = async () => {
   }
 };
 
-function is_video(data) {
-  return data.url;
-}
-
-function is_image(data) {
-  return data.hdurl;
-}
-
 function upload_video(data) {
   const regex = /https:\/\/www\.youtube\.com\/embed\/(.+)/;
   const match = regex.exec(data.url);
@@ -39,9 +35,7 @@ function upload_video(data) {
 
 async function upload_image(data) {
   const img_req = await fetch(data.hdurl);
-
   const img = await img_req.buffer();
-
   tweet_media(img.toString("base64"));
 }
 
@@ -53,7 +47,6 @@ function recordTime() {
     timestamp: time,
     date: date
   };
-
   const data_string = JSON.stringify(time_data);
 
   fs.writeFile("timestamps.json", data_string, err => {
