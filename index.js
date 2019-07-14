@@ -66,7 +66,8 @@ function readTime() {
     const timeAndDate = data.toString();
     const json = JSON.parse(timeAndDate);
 
-    setInterval(() => checkTimeDiff(json), 1000 * 60 * 60);
+    checkTimeDiff(json);
+    setInterval(() => checkTimeDiff(json), 1000 * 60 * 2);
   });
 }
 
@@ -84,8 +85,8 @@ function checkTimeDiff(json) {
   }
 }
 
-function toSeconds(t) {
-  const bits = t.split(":");
+function toSeconds(time) {
+  const bits = time.split(":");
   return bits[0] * 3600 + bits[1] * 60 + bits[2] * 1;
 }
 
