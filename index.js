@@ -27,13 +27,11 @@ const NASA_API = `https://api.nasa.gov/planetary/apod?api_key=${NASA_API_key}`;
 const run = async () => {
   const apod = await fetch(NASA_API);
   const data = await apod.json();
-
-  console.log(data.hdurl);
   console.log(data.url);
 
-  if (is_image(data)) {
+  if (data.url.endsWith(".jpg")) {
     await upload_image(data);
-  } else if (is_video(data)) {
+  } else {
     upload_video(data);
   }
 };
@@ -91,18 +89,22 @@ function readTime() {
     const timeAndDate = data.toString();
     const json = JSON.parse(timeAndDate);
 
-    const previousTime = toSeconds(json.timestamp);
-    const currentTime = toSeconds(new Date().toLocaleTimeString());
-
-    const oneDayInSeconds = 86400;
-
-    if (currentTime - previousTime < oneDayInSeconds) {
-      console.log("not enough time has elapsed");
-    } else if (currentTime - previousTime >= oneDayInSeconds) {
-      console.log("it has been at least 24 hours. It is ok to post again");
-    }
+    setInterval(() => checkTimeDiff(json), 1000);
   });
-  recordTime();
+}
+
+function checkTimeDiff(json) {
+  const previousTime = toSeconds(json.timestamp);
+  const currentTime = toSeconds(new Date().toLocaleTimeString());
+  console.log(currentTime, previousTime);
+  const oneDayInSeconds = 86400;
+  if (currentTime - previousTime < 10) {
+    console.log("not enough time has elapsed");
+  } else if (currentTime - previousTime >= 10) {
+    console.log("it has been at least 24 hours. It is ok to post again");
+    //run();
+    recordTime();
+  }
 }
 
 function toSeconds(t) {
