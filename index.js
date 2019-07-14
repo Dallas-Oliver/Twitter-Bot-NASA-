@@ -73,14 +73,14 @@ function readTime() {
     const timeAndDate = data.toString();
     const json = JSON.parse(timeAndDate);
 
-    setInterval(() => checkTimeDiff(json), 1000);
+    setInterval(() => checkTimeDiff(json), 1000 * 60 * 60);
   });
 }
 
 function checkTimeDiff(json) {
   const previousTime = toSeconds(json.timestamp);
   const currentTime = toSeconds(new Date().toLocaleTimeString());
-  console.log(currentTime, previousTime);
+
   const oneDayInSeconds = 86400;
   if (currentTime - previousTime < oneDayInSeconds) {
     console.log("not enough time has elapsed");
