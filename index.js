@@ -67,27 +67,29 @@ function readTime() {
     const json = JSON.parse(timeAndDate);
 
     checkTimeDiff(json);
-    setInterval(() => checkTimeDiff(json), 1000 * 60 * 2);
+    setInterval(() => checkTimeDiff(json), 10000);
   });
 }
 
 function checkTimeDiff(json) {
-  const previousTime = toSeconds(json.timestamp);
-  const currentTime = toSeconds(new Date().toLocaleTimeString());
+  const previousTime = toMilliseconds(json.timestamp);
+  const currentTime = toMilliseconds(new Date().toLocaleTimeString());
+  console.log(previousTime, currentTime);
 
-  const oneDayInSeconds = 86400;
-  if (currentTime - previousTime < oneDayInSeconds) {
-    console.log("not enough time has elapsed");
-  } else if (currentTime - previousTime >= oneDayInSeconds) {
+  const oneDayInMilliseconds = 86400000;
+
+  if (currentTime - previousTime < oneDayInMilliseconds) {
+    console.log("not enough time has elapsed", currentTime, previousTime);
+  } else if (currentTime - previousTime >= oneDayInMilliseconds) {
     console.log("it has been at least 24 hours. It is ok to post again");
     run();
     recordTime();
   }
 }
 
-function toSeconds(time) {
+function toMilliseconds(time) {
   const bits = time.split(":");
-  return bits[0] * 3600 + bits[1] * 60 + bits[2] * 1;
+  return bits[0] * 3600000 + bits[1] * 60000 + bits[2] * 1000;
 }
 
 readTime();
