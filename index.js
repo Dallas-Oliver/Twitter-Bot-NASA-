@@ -74,12 +74,11 @@ function readTime() {
 function checkTimeDiff(json) {
   const previousTime = toMilliseconds(json.timestamp);
   const currentTime = toMilliseconds(new Date().toLocaleTimeString());
-  console.log(previousTime, currentTime);
 
   const oneDayInMilliseconds = 86400000;
 
   if (currentTime - previousTime < oneDayInMilliseconds) {
-    console.log("not enough time has elapsed", currentTime, previousTime);
+    console.log("not enough time has elapsed");
   } else if (currentTime - previousTime >= oneDayInMilliseconds) {
     console.log("it has been at least 24 hours. It is ok to post again");
     run();
